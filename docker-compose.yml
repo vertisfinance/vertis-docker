@@ -29,11 +29,11 @@ django:
     hostname: django
     image: vertisfinance/django-python3
     entrypoint: ['python3', 'run.py']
-    command: start_runserver
+    command: start_uwsgi
     volumes_from:
         - data
     volumes:
-        - "./vertisfinance-django-python3:src"
+        - "./src:src"
         - "./conf:conf"
     links:
         - "postgres:postgres"
@@ -43,5 +43,22 @@ django:
         PYTHONUNBUFFERED: true
         UWSGI_CONF: /conf/uwsgi.conf
         DB_PASSWORD: myvertis
+    # ports:
+    #     - "8000:8000"
+
+
+nginx:
+    hostname: nginx
+    image: vertisfinance/nginx
+    entrypoint: ['python3', 'run.py']
+    command: start
+    volumes_from:
+        - data
+    volumes:
+        - "./conf:conf"
+    links:
+        - "django:django"
+    environment:
+        NGINIX_CONF: /conf/nginx.conf
     ports:
-        - "8000:8000"
+        - "80:8080"

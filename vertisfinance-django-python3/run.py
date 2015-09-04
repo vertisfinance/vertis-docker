@@ -4,12 +4,17 @@ import signal
 import click
 # import psycopg2
 
-from runutils import run_daemon, runbash, getvar
+from runutils import run_daemon, runbash, getvar, ensure_dir
+
+
+def initdirs():
+    ensure_dir('/data/static',
+               owner='django', group='django', permsission_str='777')
 
 
 @click.group()
 def run():
-    pass
+    initdirs()
 
 
 @run.command()
