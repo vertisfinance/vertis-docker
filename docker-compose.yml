@@ -1,0 +1,47 @@
+data:
+    hostname: data
+    image: vertisfinance/base
+    command: start
+    entrypoint: ['python3', 'run.py']
+    volumes:
+        - /data
+
+
+postgres:
+    hostname: postgres
+    image: vertisfinance/postgres
+    command: start
+    volumes_from:
+        - data
+    volumes:
+        - "./conf:conf"
+    entrypoint: ['python3', 'run.py']
+    environment:
+        PGDATA: /data/postgres
+        CONFIG_FILE: /conf/postgresql.conf
+        SOCKET_DIR: /data/sock
+        BACKUP_DIR: /data/backup
+    ports:
+        - "5432:5432"
+
+
+django:
+    hostname: django
+    image: vertisfinance/django-python3
+    entrypoint: ['python3', 'run.py']
+    command: start_runserver
+    volumes_from:
+        - data
+    volumes:
+        - "./vertisfinance-django-python3:src"
+        - "./conf:conf"
+    links:
+        - "postgres:postgres"
+    environment:
+        PYTHONPATH: /src/django_project
+        DJANGO_SETTINGS_MODULE: django_project.settings
+        PYTHONUNBUFFERED: true
+        UWSGI_CONF: /conf/uwsgi.conf
+        DB_PASSWORD: myvertis
+    ports:
+        - "8000:8000"
