@@ -1,0 +1,10 @@
+Protocol 2
+PasswordAuthentication no
+Port 30022
+User myvertis
+IdentitiesOnly yes
+IdentityFile /conf/id_rsa
+LogLevel DEBUG1
+UserKnownHostsFile /conf/known_hosts
+GatewayPorts yes
+LocalForward 5432 localhost:5432

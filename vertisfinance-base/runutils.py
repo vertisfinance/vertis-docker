@@ -115,7 +115,6 @@ def run_daemon(params, stdout=None, stderr=None,
             params, stdout=stdout, stderr=stderr, preexec_fn=_setuser)
         subprocess_wrapper.subprocess = sp
         waitresult = sp.wait()
-        print(waitresult)
         sys.exit(waitresult)
 
 

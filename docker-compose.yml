@@ -21,8 +21,6 @@ postgres:
         CONFIG_FILE: /conf/postgresql.conf
         SOCKET_DIR: /data/sock
         BACKUP_DIR: /data/backup
-    ports:
-        - "5432:5432"
 
 
 django:
@@ -43,8 +41,6 @@ django:
         PYTHONUNBUFFERED: true
         UWSGI_CONF: /conf/uwsgi.conf
         DB_PASSWORD: myvertis
-    # ports:
-    #     - "8000:8000"
 
 
 nginx:
@@ -62,3 +58,30 @@ nginx:
         NGINIX_CONF: /conf/nginx.conf
     ports:
         - "80:8080"
+
+
+sshd:
+    hostname: sshd
+    image: vertisfinance/ssh
+    entrypoint: ['python3', 'run.py']
+    command: start_server
+    volumes:
+        - "./conf:conf"
+    environment:
+        SSHD_CONFIG: /conf/sshd_config
+    ports:
+        - "10022:10022"
+
+
+ssh:
+    hostname: ssh
+    image: vertisfinance/ssh
+    entrypoint: ['python3', 'run.py']
+    command: start_client
+    volumes:
+        - "./conf:conf"
+    environment:
+        SSH_CONFIG: /conf/ssh_config
+        SSH_HOST: myvertis.com
+    ports:
+        - "5432:5432"
