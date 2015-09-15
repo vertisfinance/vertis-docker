@@ -20,7 +20,6 @@ RUN set -x \
            uwsgi==2.0.11.1 \
            django==1.8.4. \
            psycopg2==2.6.1 \
-           djangorestframework==3.2.2 \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get purge -y \
            python3-pip \

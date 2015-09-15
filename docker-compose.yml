@@ -25,14 +25,14 @@ postgres:
 
 django:
     hostname: django
-    image: vertisfinance/django-python2
+    image: vertisfinance/django
     entrypoint: ['python3', 'run.py']
     command: start_uwsgi
     volumes_from:
         - data
     volumes:
         - "./src:src"
-        - "./vertisfinance-django-python2/config:config"
+        - "./vertisfinance-django/config:config"
     links:
         - "postgres:postgres"
     environment:
@@ -40,7 +40,7 @@ django:
         DJANGO_SETTINGS_MODULE: django_project.settings
         PYTHONUNBUFFERED: true
         UWSGI_CONF: /config/uwsgi.conf
-        DB_PASSWORD: myvertis
+        DB_PASSWORD: put_it_into_env_file
 
 
 nginx:
@@ -82,6 +82,4 @@ ssh:
         - "./vertisfinance-ssh/config:config"
     environment:
         SSH_CONFIG: /config/ssh_config
-        SSH_HOST: myvertis.com
-    ports:
-        - "5432:5432"
+        SSH_HOST: mysshhost.com

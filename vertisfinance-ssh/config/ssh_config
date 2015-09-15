@@ -1,0 +1,10 @@
+Protocol 2
+PasswordAuthentication no
+Port 30022
+User myuser
+IdentitiesOnly yes
+IdentityFile /config/id_rsa
+LogLevel INFO
+UserKnownHostsFile /config/known_hosts
+GatewayPorts yes
+LocalForward 5432 localhost:5432

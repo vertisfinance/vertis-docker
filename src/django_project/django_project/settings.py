@@ -91,8 +91,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'HOST': 'postgres',
         'PORT': '5432',
-        'NAME': 'myvertis',
-        'USER': 'myvertis',
+        'NAME': 'postgres',
+        'USER': 'postgres',
         'PASSWORD': getvar('DB_PASSWORD')
     }
 }
