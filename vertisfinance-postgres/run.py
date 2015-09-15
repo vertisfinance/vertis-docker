@@ -121,6 +121,22 @@ def createdb(dbname, owner):
         run_cmd(psqlparams(sql), 'Creating database', user='postgres')
 
 
+@run.command()
+@click.option('--schemaname', prompt=True)
+@click.option('--dbname', prompt=True)
+@click.option('--owner', prompt=True)
+def createschema(schemaname, dbname, owner):
+    """Creates a database."""
+
+    sql = "CREATE SCHEMA %s AUTHORIZATION %s"
+    sql = sql % (schemaname, owner)
+
+    with running_db():
+        run_cmd(psqlparams(sql, database=dbname),
+                'Creating schema',
+                user='postgres')
+
+
 def _backup(backupname, user, database):
     """
     Backs up the database. The postgres process must be running
