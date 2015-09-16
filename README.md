@@ -18,7 +18,7 @@ always there. It takes one argument, the username and runs `bash` in the
 name of this user. In image `base` the default user is `developer`.
 
 ```sh
-docker run -it --rm vertisfinance/base python3 run.py
+docker run -it --rm vertisfinance/base python3 run.py shell
 docker run -it --rm vertisfinance/base python3 run.py shell root
 ```
 
