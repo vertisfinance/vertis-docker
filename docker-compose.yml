@@ -2,9 +2,10 @@ data:
     hostname: data
     image: vertisfinance/base
     command: start
-    entrypoint: ['python3', 'run.py']
     volumes:
+        - "./config/data:config"
         - /data
+    entrypoint: ['python3', '/config/run.py']
 
 
 postgres:
@@ -14,72 +15,75 @@ postgres:
     volumes_from:
         - data
     volumes:
-        - "./vertisfinance-postgres/config:config"
-    entrypoint: ['python3', 'run.py']
+        - "./config/postgres:config"
+    entrypoint: ['python3', '/config/run.py']
     environment:
         PGDATA: /data/postgres
-        CONFIG_FILE: /config/postgresql.conf
-        SOCKET_DIR: /data/sock
-        BACKUP_DIR: /data/backup
+        DB_PASSWORD: in env file...
+    env_file: env.txt
+    ports:
+        - "5432:5432"
 
 
 django:
     hostname: django
     image: vertisfinance/django
-    entrypoint: ['python3', 'run.py']
-    command: start_uwsgi
+    entrypoint: ['python3', '/config/run.py']
+    command: start_runserver
     volumes_from:
         - data
     volumes:
         - "./src:src"
-        - "./vertisfinance-django/config:config"
+        - "./config/django:config"
     links:
         - "postgres:postgres"
     environment:
         PYTHONPATH: /src/django_project
         DJANGO_SETTINGS_MODULE: django_project.settings
         PYTHONUNBUFFERED: true
-        UWSGI_CONF: /config/uwsgi.conf
-        DB_PASSWORD: put_it_into_env_file
-
-
-nginx:
-    hostname: nginx
-    image: vertisfinance/nginx
-    entrypoint: ['python3', 'run.py']
-    command: start
-    volumes_from:
-        - data
-    volumes:
-        - "./vertisfinance-nginx/config:config"
-    links:
-        - "django:django"
-    environment:
-        NGINIX_CONF: /config/nginx.conf
+        DB_PASSWORD: in env file...
+    env_file: env.txt
     ports:
-        - "80:8080"
+        - "80:8000"
 
 
-sshd:
-    hostname: sshd
-    image: vertisfinance/ssh
-    entrypoint: ['python3', 'run.py']
-    command: start_server
-    volumes:
-        - "./vertisfinance-ssh/config:config"
-    environment:
-        SSHD_CONFIG: /config/sshd_config
-    ports:
-        - "10022:10022"
+# nginx:
+#     hostname: nginx
+#     image: vertisfinance/nginx
+#     entrypoint: ['python3', 'run.py']
+#     command: start
+#     volumes_from:
+#         - data
+#     volumes:
+#         - "./vertisfinance-nginx/config:config"
+#     links:
+#         - "django:django"
+#     environment:
+#         NGINIX_CONF: /config/nginx.conf
+#     ports:
+#         - "80:8080"
 
 
-ssh:
-    hostname: ssh
-    image: vertisfinance/ssh
-    entrypoint: ['python3', 'run.py']
-    command: start_client
-    volumes:
-        - "./vertisfinance-ssh/config:config"
-    environment:
-        SSH_CONFIG: /config/ssh_config
-        SSH_HOST: mysshhost.com
+# sshd:
+#     hostname: sshd
+#     image: vertisfinance/ssh
+#     entrypoint: ['python3', 'run.py']
+#     command: start_server
+#     volumes:
+#         - "./vertisfinance-ssh/config:config"
+#     environment:
+#         SSHD_CONFIG: /config/sshd_config
+#     ports:
+#         - "10022:10022"
+
+
+# ssh:
+#     hostname: ssh
+#     image: vertisfinance/ssh
+#     entrypoint: ['python3', 'run.py']
+#     command: start_client
+#     volumes:
+#         - "./vertisfinance-ssh/config:config"
+#     environment:
+#         SSH_CONFIG: /config/ssh_config
+#         SSH_HOST: mysshhost.com

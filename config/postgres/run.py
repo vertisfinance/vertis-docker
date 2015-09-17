@@ -14,17 +14,28 @@ from runutils import (run_daemon, getvar, runbash, id, run_cmd, setuser,
                       ensure_dir)
 
 
-CONFIG_FILE = getvar('CONFIG_FILE')
-PGDATA = getvar('PGDATA')
-PGDATA_PARENT = os.path.split(PGDATA)[0]
-SOCKET_DIR = getvar('SOCKET_DIR')
-BACKUP_DIR = getvar('BACKUP_DIR')
+####################################
+# CONFIGURATION: Edit if necessary #
+####################################
 
+PGDATA = getvar('PGDATA')
+CONFIG_FILE = '/config/postgresql.conf'
+SOCKET_DIR = '/data/sock'
+BACKUP_DIR = '/data/backup'
+
+PGDATA_PARENT = os.path.split(PGDATA)[0]
+
+
+##################################
+# UTILITY FUNCTIONS: do not edit #
+##################################
 
 start_postgres = ['postgres', '-c', 'config_file=%s' % CONFIG_FILE]
 
 
 def psqlparams(command=None, database='postgres'):
+    """Returns a list of command line arguments to run psql."""
+
     if command is None:
         return ['psql', '-d', database, '-h', SOCKET_DIR]
     else:
@@ -33,7 +44,11 @@ def psqlparams(command=None, database='postgres'):
 
 @contextmanager
 def running_db():
-    # let's start the database if needed
+    """
+    Starts and stops postgres (if it is not running) so the block
+    inside the with statement can execute command against it.
+    """
+
     subproc = None
     if not os.path.isfile(os.path.join(PGDATA, 'postmaster.pid')):
         setpostgresuser = setuser('postgres')
@@ -49,44 +64,19 @@ def running_db():
     try:
         yield
     finally:
-        # and stop when finished
         if subproc:
             subproc.send_signal(signal.SIGTERM)
             click.echo('Waiting for database to stop...')
             subproc.wait()
 
 
-def initdirs():
-    ensure_dir(PGDATA_PARENT,
-               owner='root', group='root', permsission_str='777')
-    ensure_dir(SOCKET_DIR,
-               owner='root', group='root', permsission_str='777')
-    ensure_dir(BACKUP_DIR,
-               owner='postgres', group='postgres', permsission_str='700')
+def _initdb():
+    """Initialize the database."""
+
+    run_cmd(['initdb'], user='postgres', message='Initializing the database')
 
 
-@click.group()
-def run():
-    initdirs()
-
-
-@run.command()
-@click.argument('user', default='postgres')
-def shell(user):
-    runbash(user)
-
-
-@run.command()
-def initdb():
-    params = ['initdb']
-    run_cmd(params, user='postgres', message='Initializing the database')
-
-
-@run.command()
-@click.option('--username', prompt=True)
-@click.option('--password', prompt=True,
-              hide_input=True, confirmation_prompt=True)
-def createuser(username, password):
+def _createuser(username, password):
     """Creates a user with the given password."""
 
     sql = "CREATE USER %s WITH PASSWORD '%s'" % (username, password)
@@ -95,11 +85,7 @@ def createuser(username, password):
         run_cmd(psqlparams(sql), 'Creating user', user='postgres')
 
 
-@run.command()
-@click.option('--username', prompt=True)
-@click.option('--password', prompt=True,
-              hide_input=True, confirmation_prompt=True)
-def setpwd(username, password):
+def _setpwd(username, password):
     """Sets the password for the given user."""
 
     sql = "ALTER USER %s WITH PASSWORD '%s'" % (username, password)
@@ -108,10 +94,7 @@ def setpwd(username, password):
         run_cmd(psqlparams(sql), 'Setting password', user='postgres')
 
 
-@run.command()
-@click.option('--dbname', prompt=True)
-@click.option('--owner', prompt=True)
-def createdb(dbname, owner):
+def _createdb(dbname, owner):
     """Creates a database."""
 
     sql = "CREATE DATABASE %s WITH ENCODING 'UTF8' OWNER %s"
@@ -121,11 +104,7 @@ def createdb(dbname, owner):
         run_cmd(psqlparams(sql), 'Creating database', user='postgres')
 
 
-@run.command()
-@click.option('--schemaname', prompt=True)
-@click.option('--dbname', prompt=True)
-@click.option('--owner', prompt=True)
-def createschema(schemaname, dbname, owner):
+def _createschema(schemaname, dbname, owner):
     """Creates a database."""
 
     sql = "CREATE SCHEMA %s AUTHORIZATION %s"
@@ -138,15 +117,14 @@ def createschema(schemaname, dbname, owner):
 
 
 def _backup(backupname, user, database):
-    """
-    Backs up the database. The postgres process must be running
-    in some other container (on this host).
-    """
+    """Backs up the database with pg_dump."""
 
+    # We have some restrictions on the backupname
     if re.match('[a-z0-9_-]+$', backupname) is None:
         click.secho('Invalid backupname.', fg='red')
         sys.exit(1)
 
+    # The file must not exist
     filename = os.path.join(BACKUP_DIR, backupname)
     if os.path.isfile(filename):
         click.secho('File %s exists.' % filename, fg='red')
@@ -154,7 +132,7 @@ def _backup(backupname, user, database):
 
     params = ['pg_dump', '-h', SOCKET_DIR, '-O', '-x', '-U', user, database]
 
-    with open(filename, 'w') as f:
+    with open(filename, 'w') as f, running_db():
         ret = subprocess.call(params, stdout=f, preexec_fn=setuser('postgres'))
 
     uid, gid, _ = id('postgres')
@@ -171,16 +149,11 @@ def _backup(backupname, user, database):
         sys.exit(1)
 
 
-@run.command()
-@click.option('--backupname', prompt=True)
-@click.option('--user', prompt=True)
-@click.option('--database', prompt=True)
-@click.option('--do_backup', is_flag=True,
-              prompt='Should we make backup?', default=False)
-def restore(backupname, user, database, do_backup):
+def _restore(backupname, user, database, do_backup=True):
     """
-    Recreatest the database from a backup file. This will drop the
+    Recreatest the database from a backup file. Will drop the
     original database.
+    Creates a backup if do_backup is True.
     """
 
     filename = os.path.join(BACKUP_DIR, backupname)
@@ -211,13 +184,118 @@ def restore(backupname, user, database, do_backup):
                 user='postgres')
 
 
+def _clear(confirm=True):
+    """
+    Removes all files unker PGDATA. Backup is recommended!
+    """
+    if not os.path.isdir(PGDATA):
+        return
+
+    if confirm and not click.confirm('Are you absolutely sure?'):
+        return
+
+    if os.path.isfile(os.path.join(PGDATA, 'postmaster.pid')):
+        click.secho('Database is running. Stop it before clear.', fg='red')
+        sys.exit(1)
+
+    run_cmd(['rm', '-rf', PGDATA],
+            message='Removing directory %s' % PGDATA)
+
+
+################################################
+# INIT: WILL RUN BEFORE ANY COMMAND AND START  #
+# Modify it according to container needs       #
+# Init functions should be fast and idempotent #
+################################################
+
+
+def init():
+    ensure_dir(PGDATA_PARENT,
+               owner='root', group='root', permsission_str='777')
+    ensure_dir(SOCKET_DIR,
+               owner='root', group='root', permsission_str='777')
+    ensure_dir(BACKUP_DIR,
+               owner='postgres', group='postgres', permsission_str='700')
+
+    if not os.path.isdir(PGDATA):
+        _initdb()
+
+    _setpwd('postgres', getvar('DB_PASSWORD'))
+
+
+######################################################################
+# COMMANDS                                                           #
+# Add your own if needed, remove or comment out what is unnecessary. #
+######################################################################
+
+@click.group()
+def run():
+    init()
+
+
+@run.command()
+@click.argument('user', default='postgres')
+def shell(user):
+    runbash(user)
+
+
+@run.command()
+def initdb():
+    _initdb()
+
+
+@run.command()
+@click.option('--username', prompt=True)
+@click.option('--password', prompt=True,
+              hide_input=True, confirmation_prompt=True)
+def createuser(username, password):
+    _createuser(username, password)
+
+
+@run.command()
+@click.option('--username', prompt=True)
+@click.option('--password', prompt=True,
+              hide_input=True, confirmation_prompt=True)
+def setpwd(username, password):
+    _setpwd(username, password)
+
+
+@run.command()
+@click.option('--dbname', prompt=True)
+@click.option('--owner', prompt=True)
+def createdb(dbname, owner):
+    _createdb(dbname, owner)
+
+
+@run.command()
+@click.option('--schemaname', prompt=True)
+@click.option('--dbname', prompt=True)
+@click.option('--owner', prompt=True)
+def createschema(schemaname, dbname, owner):
+    _createschema(schemaname, dbname, owner)
+
+
+@run.command()
+@click.option('--backupname', prompt=True)
+@click.option('--user', prompt=True)
+@click.option('--database', prompt=True)
+@click.option('--do_backup', is_flag=True,
+              prompt='Should we make backup?', default=False)
+def restore(backupname, user, database, do_backup):
+    _restore(backupname, user, database, do_backup)
+
+
 @run.command()
 @click.option('--backupname', prompt=True)
 @click.option('--user', prompt=True)
 @click.option('--database', prompt=True)
 def backup(backupname, user, database):
-    with running_db():
-        _backup(backupname, user, database)
+    _backup(backupname, user, database)
+
+
+@run.command()
+def clear():
+    _clear()
 
 
 @run.command()

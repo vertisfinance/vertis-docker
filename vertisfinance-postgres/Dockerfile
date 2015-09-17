@@ -20,5 +20,3 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH /usr/lib/postgresql/9.4/bin:$PATH
-
-COPY run.py run.py
