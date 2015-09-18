@@ -156,7 +156,7 @@ def setuser(username):
 
 def id(username):
     """
-    Returns uid, gid for the given username.
+    Returns uid, gid, home directory for the given username.
     """
     userinfo = pwd.getpwnam(username)
     return userinfo.pw_uid, userinfo.pw_gid, userinfo.pw_dir

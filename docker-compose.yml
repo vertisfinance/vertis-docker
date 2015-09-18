@@ -19,7 +19,6 @@ postgres:
     entrypoint: ['python3', '/config/run.py']
     environment:
         PGDATA: /data/postgres
-        # DB_PASSWORD: in env file...
     env_file: env.txt
     ports:
         - "5432:5432"
@@ -29,7 +28,7 @@ django:
     hostname: django
     image: vertisfinance/django
     entrypoint: ['python3', '/config/run.py']
-    command: start_runserver
+    command: start_uwsgi
     volumes_from:
         - data
     volumes:
@@ -41,39 +40,32 @@ django:
         PYTHONPATH: /src/django_project
         DJANGO_SETTINGS_MODULE: django_project.settings
         PYTHONUNBUFFERED: true
-        # DB_PASSWORD: in env file...
-        # DJANGO_SECRET_KEY: in env file...
     env_file: env.txt
+
+
+nginx:
+    hostname: nginx
+    image: vertisfinance/nginx
+    entrypoint: ['python3', '/config/run.py']
+    command: start
+    volumes_from:
+        - data
+    volumes:
+        - "./config/nginx:config"
+    links:
+        - "django:django"
     ports:
-        - "80:8000"
-
-
-# nginx:
-#     hostname: nginx
-#     image: vertisfinance/nginx
-#     entrypoint: ['python3', 'run.py']
-#     command: start
-#     volumes_from:
-#         - data
-#     volumes:
-#         - "./vertisfinance-nginx/config:config"
-#     links:
-#         - "django:django"
-#     environment:
-#         NGINIX_CONF: /config/nginx.conf
-#     ports:
-#         - "80:8080"
+        - "80:8080"
 
 
 # sshd:
 #     hostname: sshd
 #     image: vertisfinance/ssh
-#     entrypoint: ['python3', 'run.py']
+#     entrypoint: ['python3', '/config/run.py']
 #     command: start_server
 #     volumes:
-#         - "./vertisfinance-ssh/config:config"
-#     environment:
-#         SSHD_CONFIG: /config/sshd_config
+#         - "./config/ssh:config"
+#         - "~/.ssh:host_ssh"
 #     ports:
 #         - "10022:10022"
 
@@ -81,10 +73,8 @@ django:
 # ssh:
 #     hostname: ssh
 #     image: vertisfinance/ssh
-#     entrypoint: ['python3', 'run.py']
+#     entrypoint: ['python3', '/config/run.py']
 #     command: start_client
 #     volumes:
-#         - "./vertisfinance-ssh/config:config"
-#     environment:
-#         SSH_CONFIG: /config/ssh_config
-#         SSH_HOST: mysshhost.com
+#         - "./config/ssh:config"
+#         - "~/.ssh:host_ssh"

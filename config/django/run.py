@@ -56,6 +56,9 @@ def init(stopper):
     if not stopper.stopped:
         run_cmd(['django-admin', 'migrate'], user='django')
 
+    if not stopper.stopped:
+        run_cmd(['django-admin', 'collectstatic', '--noinput'], user='django')
+
     # This is mainly for demonstartive purposes, but can be handy in
     # development
     if stopper.stopped:

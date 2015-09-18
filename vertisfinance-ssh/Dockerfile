@@ -14,7 +14,8 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /var/run/sshd
-# RUN rm /etc/ssh/ssh*
+RUN mkdir /.ssh
+RUN chown 10022:10022 /.ssh
+RUN chmod 700 /.ssh
 
-COPY run.py run.py
 RUN usermod -p '*' ssh

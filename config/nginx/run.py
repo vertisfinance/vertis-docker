@@ -1,9 +1,9 @@
 import click
 
-from runutils import runbash, run_daemon, getvar
+from runutils import runbash, run_daemon
 
 
-NGINIX_CONF = getvar('NGINIX_CONF')
+NGINIX_CONF = '/config/nginx.conf'
 
 
 @click.group()
