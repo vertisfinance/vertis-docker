@@ -219,8 +219,7 @@ def init():
 
     if not os.path.isdir(PGDATA):
         _initdb()
-
-    _setpwd('postgres', getvar('DB_PASSWORD'))
+        _setpwd('postgres', getvar('DB_PASSWORD'))
 
 
 ######################################################################

@@ -19,7 +19,7 @@ postgres:
     entrypoint: ['python3', '/config/run.py']
     environment:
         PGDATA: /data/postgres
-        DB_PASSWORD: in env file...
+        # DB_PASSWORD: in env file...
     env_file: env.txt
     ports:
         - "5432:5432"
@@ -41,7 +41,8 @@ django:
         PYTHONPATH: /src/django_project
         DJANGO_SETTINGS_MODULE: django_project.settings
         PYTHONUNBUFFERED: true
-        DB_PASSWORD: in env file...
+        # DB_PASSWORD: in env file...
+        # DJANGO_SECRET_KEY: in env file...
     env_file: env.txt
     ports:
         - "80:8000"

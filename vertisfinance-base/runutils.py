@@ -44,7 +44,7 @@ def run_cmd(args, message=None, input=None, user=None):
     If input is given, it will be passed to the subprocess.
     """
     if message:
-        click.echo(message + ' ... ', nl=False)
+        click.echo(message + ' ... ')
 
     _setuser = setuser(user) if user else None
 

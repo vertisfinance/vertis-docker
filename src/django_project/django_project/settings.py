@@ -32,7 +32,7 @@ def getvar(name, default=None):
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '^s6mjqd+(i+l0pm@m7^jz9fg)ijg9md0nz-2pb2blg2i0bg-!e'
+SECRET_KEY = getvar('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
