@@ -80,13 +80,16 @@ def run_cmd(args, message=None, input=None, user=None):
 
 def run_daemon(params, stdout=None, stderr=None,
                signal_to_send=signal.SIGTERM,
-               waitfunc=None, user=None):
+               waitfunc=None, user=None,
+               semafor=None, exit=True):
     """
-    Runs the command as a daemon and returns it's returncode.
+    Runs the command as the given user (or root by default) in daemon mode
+    and exits with it's returncode.
     Connects the given stdout, sends the specified signal to exit.
     If waitfunc is given it must accept an object and it should
     return as soon as possible if object.stopped evaluates to True.
-    If setpgrp is True, os.setpgrp() will be called on the process.
+    If semafor is provided it should be a path to a file. Before exit,
+    this file should be deleted.
     """
     class Stopper(object):
         def __init__(self):
@@ -115,7 +118,18 @@ def run_daemon(params, stdout=None, stderr=None,
             params, stdout=stdout, stderr=stderr, preexec_fn=_setuser)
         subprocess_wrapper.subprocess = sp
         waitresult = sp.wait()
+    else:
+        waitresult = 0
+
+    try:
+        os.remove(semafor)
+    except:
+        pass
+
+    if exit:
         sys.exit(waitresult)
+    else:
+        return waitresult
 
 
 def setuser(username):

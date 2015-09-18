@@ -22,6 +22,7 @@ PGDATA = getvar('PGDATA')
 CONFIG_FILE = '/config/postgresql.conf'
 SOCKET_DIR = '/data/sock'
 BACKUP_DIR = '/data/backup'
+SEMAFOR = '/data/sock/pg_semafor'
 
 PGDATA_PARENT = os.path.split(PGDATA)[0]
 
@@ -229,7 +230,12 @@ def init():
 
 @click.group()
 def run():
+    try:
+        os.remove(SEMAFOR)
+    except:
+        pass
     init()
+    open(SEMAFOR, 'w').close()
 
 
 @run.command()
@@ -299,7 +305,7 @@ def clear():
 
 @run.command()
 def start():
-    run_daemon(start_postgres, user='postgres')
+    run_daemon(start_postgres, user='postgres', semafor=SEMAFOR)
 
 
 if __name__ == '__main__':
