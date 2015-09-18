@@ -210,7 +210,7 @@ def _clear(confirm=True):
 ################################################
 
 
-def init():
+def init(stopper):
     ensure_dir(PGDATA_PARENT,
                owner='root', group='root', permsission_str='777')
     ensure_dir(SOCKET_DIR,
@@ -230,17 +230,13 @@ def init():
 
 @click.group()
 def run():
-    try:
-        os.remove(SEMAFOR)
-    except:
-        pass
-    init()
-    open(SEMAFOR, 'w').close()
+    pass
 
 
 @run.command()
 @click.argument('user', default='postgres')
 def shell(user):
+    init()
     runbash(user)
 
 
@@ -305,7 +301,7 @@ def clear():
 
 @run.command()
 def start():
-    run_daemon(start_postgres, user='postgres', semafor=SEMAFOR)
+    run_daemon(start_postgres, user='postgres', semafor=SEMAFOR, initfunc=init)
 
 
 if __name__ == '__main__':

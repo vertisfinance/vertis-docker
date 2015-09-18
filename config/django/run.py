@@ -12,7 +12,7 @@ UWSGI_CONF = '/config/uwsgi.conf'
 PG_SEMAFOR = '/data/sock/pg_semafor'
 
 
-def waitfordb(stopper=None):
+def waitfordb(stopper):
     """
     Wait for the database to accept connections.
     """
@@ -37,7 +37,7 @@ def waitfordb(stopper=None):
             click.echo('no semafor yet')
 
         for w in range(i):
-            if stopper and stopper.stopped:
+            if stopper.stopped:
                 return
             time.sleep(tick)
 
@@ -49,15 +49,18 @@ def waitfordb(stopper=None):
 ################################################
 
 
-def init():
+def init(stopper):
     ensure_dir('/data/static',
                owner='django', group='django', permsission_str='777')
 
-    waitfordb()
-    run_cmd(['django-admin', 'migrate'], user='django')
+    if not stopper.stopped:
+        run_cmd(['django-admin', 'migrate'], user='django')
 
     # This is mainly for demonstartive purposes, but can be handy in
     # development
+    if stopper.stopped:
+        return
+
     import django
     django.setup()
     from django.contrib.auth.models import User
@@ -76,7 +79,7 @@ def init():
 
 @click.group()
 def run():
-    init()
+    pass
 
 
 @run.command()
@@ -89,7 +92,7 @@ def shell(user):
 def start_runserver():
     start = ['django-admin.py', 'runserver', '0.0.0.0:8000']
     run_daemon(start, signal_to_send=signal.SIGINT, user='django',
-               waitfunc=waitfordb)
+               waitfunc=waitfordb, initfunc=init)
 
 
 @run.command()
@@ -97,7 +100,7 @@ def start_uwsgi():
     """Starts the service."""
     start = ["uwsgi", "--ini", UWSGI_CONF]
     run_daemon(start, signal_to_send=signal.SIGQUIT, user='django',
-               waitfunc=waitfordb)
+               waitfunc=waitfordb, initfunc=init)
 
 
 if __name__ == '__main__':

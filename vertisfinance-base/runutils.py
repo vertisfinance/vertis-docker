@@ -81,7 +81,7 @@ def run_cmd(args, message=None, input=None, user=None):
 def run_daemon(params, stdout=None, stderr=None,
                signal_to_send=signal.SIGTERM,
                waitfunc=None, user=None,
-               semafor=None, exit=True):
+               semafor=None, initfunc=None):
     """
     Runs the command as the given user (or root by default) in daemon mode
     and exits with it's returncode.
@@ -112,11 +112,18 @@ def run_daemon(params, stdout=None, stderr=None,
     if waitfunc:
         waitfunc(stopper)
 
+    if initfunc:
+        initfunc(stopper)
+
     _setuser = setuser(user) if user else None
     if not stopper.stopped:
         sp = subprocess.Popen(
             params, stdout=stdout, stderr=stderr, preexec_fn=_setuser)
         subprocess_wrapper.subprocess = sp
+
+        if semafor:
+            open(semafor, 'w').close()
+
         waitresult = sp.wait()
     else:
         waitresult = 0
@@ -126,10 +133,7 @@ def run_daemon(params, stdout=None, stderr=None,
     except:
         pass
 
-    if exit:
-        sys.exit(waitresult)
-    else:
-        return waitresult
+    sys.exit(waitresult)
 
 
 def setuser(username):
