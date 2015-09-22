@@ -8,7 +8,7 @@ from runutils import runbash, run_daemon, id
 
 SSHD_CONFIG = '/config/sshd_config'
 SSH_CONFIG = '/config/ssh_config'
-SSH_HOST = 'myhost.com'
+SSH_HOST = 'myvertis.com'
 SECRET_FILES_ROOT = '/host_ssh'
 
 

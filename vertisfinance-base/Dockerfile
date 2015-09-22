@@ -11,6 +11,9 @@ RUN set -x \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get install -y --no-install-recommends \
            python3 \
+           ca-certificates \
+    && DEBIAN_FRONTEND=noninteractive \
+       apt-get install -y --no-install-recommends \
            python3-pip \
     && pip3 install \
            click \

@@ -12,5 +12,3 @@ RUN set -x \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-COPY run.py run.py

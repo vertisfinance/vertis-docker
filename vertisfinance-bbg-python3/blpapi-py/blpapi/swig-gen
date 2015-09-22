@@ -1,0 +1,2 @@
+swig -python -c++ -I${BLPAPI_ROOT}/include internals.i
+
