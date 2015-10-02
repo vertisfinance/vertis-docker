@@ -4,3 +4,6 @@ __pycache__
 authorized_keys
 id_rsa
 known_hosts
+container_shared/*
+!container_shared/.init
+

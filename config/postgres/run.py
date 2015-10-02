@@ -210,7 +210,7 @@ def _clear(confirm=True):
 ################################################
 
 
-def init(stopper):
+def init(stopper=None):
     ensure_dir(PGDATA_PARENT,
                owner='root', group='root', permsission_str='777')
     ensure_dir(SOCKET_DIR,

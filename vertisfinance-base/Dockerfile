@@ -12,6 +12,7 @@ RUN set -x \
        apt-get install -y --no-install-recommends \
            python3 \
            python3-pip \
+           vim \
     && pip3 install \
            click \
     && DEBIAN_FRONTEND=noninteractive \
