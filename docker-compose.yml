@@ -21,7 +21,7 @@ postgres:
         PGDATA: /data/postgres
     env_file: env.txt
     ports:
-        - "5433:5432"
+        - "5432:5432"
 
 
 django:
@@ -56,7 +56,7 @@ nginx:
     links:
         - "django:django"
     ports:
-        - "8080:8080"
+        - "80:8080"
 
 
 # sshd:

@@ -6,4 +6,5 @@ id_rsa
 known_hosts
 container_shared/*
 !container_shared/.init
+dev-docker-compose.yml
 
