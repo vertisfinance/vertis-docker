@@ -1,7 +1,33 @@
-docker build -t vertisfinance/base vertisfinance-base
-docker build -t vertisfinance/postgres vertisfinance-postgres
-docker build -t vertisfinance/nginx vertisfinance-nginx
-docker build -t vertisfinance/django-python2 vertisfinance-django-python2
-docker build -t vertisfinance/django-python3 vertisfinance-django-python3
-docker build -t vertisfinance/django vertisfinance-django
-docker build -t vertisfinance/ssh vertisfinance-ssh
+#! /bin/bash
+
+set -e
+
+dir="$(dirname "$BASH_SOURCE")"
+
+echo "vertisfinance/base"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-base"
+
+echo "vertisfinance/postgres"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-postgres"
+
+echo "vertisfinance/nginx"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-nginx"
+
+echo "vertisfinance/django-python2"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-django-python2"
+
+echo "vertisfinance/django-python3"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-django-python3"
+
+echo "vertisfinance/django"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-django"
+
+echo "vertisfinance/ssh"
+echo "--------------------"
+docker build -t vertis/core "$dir/vertisfinance-ssh"

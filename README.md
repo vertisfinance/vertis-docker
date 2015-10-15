@@ -1,7 +1,11 @@
 # vertis-docker
 
-This is a collection of publicly available docker image definitions
-we use at Vertis.
+A collection of easily customizable docker images put together for
+django development and more.
+
+## Idea Behind
+
+
 
 ### vertisfinance/base
 
@@ -34,3 +38,8 @@ data:
     volumes:
         - /data
 ```
+
+### TODO
+
+- More documentation
+- Configure logging
