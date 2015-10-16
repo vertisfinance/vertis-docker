@@ -5,6 +5,7 @@ import sys
 import subprocess
 import signal
 import pwd
+import shutil
 
 import click
 
@@ -21,7 +22,7 @@ def getvar(name, default=None):
     return ret
 
 
-def ensure_dir(dir, owner=None, group=None, permsission_str=None):
+def ensure_dir(dir, owner=None, group=None, permission_str=None):
     """
     Checks the existence of the giver direcoty and creates it if not present.
     If `owner` is not present, root will own the newly created dir.
@@ -34,8 +35,8 @@ def ensure_dir(dir, owner=None, group=None, permsission_str=None):
         subprocess.call(['chown', owner, dir])
     if group:
         subprocess.call(['chgrp', group, dir])
-    if permsission_str:
-        subprocess.call(['chmod', permsission_str, dir])
+    if permission_str:
+        subprocess.call(['chmod', permission_str, dir])
 
 
 def ensure_user(username, uid, groupname=None, gid=None,
@@ -223,3 +224,31 @@ def substitute(filename, mapping):
 
 def runbash(user):
     subprocess.call(['bash'], preexec_fn=setuser(user))
+
+
+def merge_dir(src, dst, owner=None, group=None, permission_str=None):
+    """
+    Copy files and dirs from src to dst recursively.
+    """
+    assert all([os.path.isdir(src), os.path.isdir(dst)])
+
+    for path, dirnames, filenames in os.walk(src):
+        rel = os.path.relpath(path, start=src)
+        pair = os.path.normpath(os.path.join(dst, rel))
+
+        for d in dirnames:
+            dirtocheck = os.path.join(pair, d)
+            ensure_dir(dirtocheck, owner, group, permission_str)
+            if not permission_str:
+                shutil.copymode(os.path.join(path, d), dirtocheck)
+
+        for f in filenames:
+            srcfile = os.path.join(path, f)
+            pairfile = os.path.join(pair, f)
+            shutil.copy(srcfile, pairfile)
+            if owner:
+                subprocess.call(['chown', owner, pairfile])
+            if group:
+                subprocess.call(['chgrp', group, pairfile])
+            if permission_str:
+                subprocess.call(['chmod', permission_str, pairfile])
