@@ -38,7 +38,8 @@ def ensure_dir(dir, owner=None, group=None, permsission_str=None):
         subprocess.call(['chmod', permsission_str, dir])
 
 
-def ensure_user(username, uid, groupname=None, gid=None):
+def ensure_user(username, uid, groupname=None, gid=None,
+                unlock=False):
     """
     If `username` does not exist, we create one with uid.
     """
@@ -53,11 +54,14 @@ def ensure_user(username, uid, groupname=None, gid=None):
         pass
 
     try:
-        subprocess.call(['useradd',
-                         '-u', str(uid),
-                         '-g', str(gid),
-                         '-s', '/bin/bash',
-                         '-m', username])
+        params = ['useradd',
+                  '-u', str(uid),
+                  '-g', str(gid),
+                  '-s', '/bin/bash',
+                  '-m', username]
+        if unlock:
+            params += ['-p', '*']
+        subprocess.call(params)
     except:
         pass
 

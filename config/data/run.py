@@ -13,7 +13,7 @@ def run():
 
 
 @run.command()
-@click.argument('user', default=USER_UID)
+@click.argument('user', default=USER_NAME)
 def shell(user):
     runbash(user)
 

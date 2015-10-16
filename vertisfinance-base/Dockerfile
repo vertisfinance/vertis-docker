@@ -4,7 +4,11 @@ MAINTAINER Richard Bann "richard.bann@vertis.com"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
 
-ENV LANG C.UTF-8
+RUN apt-get install -y --no-install-recommends locales
+RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen && locale-gen
+ENV LC_ALL C.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 RUN set -x \
     && apt-get update \
