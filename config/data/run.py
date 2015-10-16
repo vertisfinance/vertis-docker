@@ -1,15 +1,19 @@
 import click
 
-from runutils import runbash
+from runutils import runbash, ensure_user, getvar
+
+
+USER_UID = int(getvar('USER_UID'))
+USER_NAME = getvar('USER_NAME')
 
 
 @click.group()
 def run():
-    pass
+    ensure_user(USER_NAME, USER_UID)
 
 
 @run.command()
-@click.argument('user', default='developer')
+@click.argument('user', default=USER_UID)
 def shell(user):
     runbash(user)
 

@@ -23,6 +23,5 @@ RUN set -x \
 
 COPY skel /etc/skel
 COPY skel/* /root/
-RUN groupadd -g 1000 developer && useradd -u 1000 -g 1000 -m developer
 
 COPY runutils.py /usr/local/lib/python3.4/dist-packages/runutils.py
