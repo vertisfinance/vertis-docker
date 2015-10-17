@@ -11,20 +11,23 @@ data:
         USER_NAME: dev
 
 
-# postgres:
-#     hostname: postgres
-#     image: vertisfinance/postgres
-#     command: start
-#     volumes_from:
-#         - data
-#     volumes:
-#         - "./config/postgres:config"
-#     entrypoint: ['python3', '/config/run.py']
-#     environment:
-#         PGDATA: /data/postgres
-#     env_file: env.txt
-#     ports:
-#         - "5432:5432"
+postgres:
+    hostname: postgres
+    image: vertisfinance/postgres
+    command: start
+    volumes_from:
+        - data
+    volumes:
+        - "./config/postgres:/opt/config"
+    entrypoint: ['python3', '/opt/config/run.py']
+    environment:
+        PGDATA: /opt/data/postgres
+        USER_UID: 5432
+        USER_NAME: pg
+
+    env_file: env.txt
+    ports:
+        - "5432:5432"
 
 
 # django:

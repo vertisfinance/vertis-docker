@@ -2,7 +2,7 @@ FROM vertisfinance/base
 
 MAINTAINER Richard Bann richard.bann@vertis.com
 
-RUN groupadd -g 5432 postgres && useradd -u 5432 -g 5432 -m postgres
+ENV PG_VERSION=9.4
 
 RUN set -x \
     && apt-get update \
@@ -13,10 +13,16 @@ RUN set -x \
        /etc/postgresql-common/createcluster.conf \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get install -y --no-install-recommends \
-           postgresql-9.4 \
-           postgresql-contrib-9.4 \
+           postgresql-${PG_VERSION} \
+           postgresql-contrib-${PG_VERSION} \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH /usr/lib/postgresql/9.4/bin:$PATH
+
+RUN rmdir /run/postgresql
+RUN rmdir /var/lib/postgresql
+RUN rmdir /var/log/postgresql
+
+RUN userdel postgres
