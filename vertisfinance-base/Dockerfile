@@ -29,5 +29,7 @@ RUN set -x \
 
 COPY skel /etc/skel
 COPY skel/* /root/
-
 COPY runutils.py /usr/local/lib/python3.4/dist-packages/runutils.py
+
+ENTRYPOINT ["python3", "/opt/config/run.py"]
+CMD start

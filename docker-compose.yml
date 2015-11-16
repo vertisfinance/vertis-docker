@@ -1,33 +1,41 @@
 data:
     hostname: data
     image: vertisfinance/base
-    command: start
     volumes:
         - "./config/data:/opt/config"
         - /opt/data
-    entrypoint: ['python3', '/opt/config/run.py']
     environment:
         USER_UID: 1000
         USER_NAME: dev
 
 
-postgres:
-    hostname: postgres
-    image: vertisfinance/postgres
-    command: start
-    volumes_from:
-        - data
+logs:
+    hostname: logs
+    image: vertisfinance/base
     volumes:
-        - "./config/postgres:/opt/config"
-    entrypoint: ['python3', '/opt/config/run.py']
+        - "./config/data:/opt/config"
+        - /opt/logs
     environment:
-        PGDATA: /opt/data/postgres
-        USER_UID: 5432
-        USER_NAME: pg
+        USER_UID: 1000
+        USER_NAME: dev
 
-    env_file: env.txt
-    ports:
-        - "5432:5432"
+
+# postgres:
+#     hostname: postgres
+#     image: vertisfinance/postgres
+#     command: start
+#     volumes_from:
+#         - data
+#     volumes:
+#         - "./config/postgres:/opt/config"
+#     entrypoint: ['python3', '/opt/config/run.py']
+#     environment:
+#         PGDATA: /opt/data/postgres
+#         USER_UID: 5432
+#         USER_NAME: pg
+#     env_file: env.txt
+#     ports:
+#         - "5432:5432"
 
 
 # django:

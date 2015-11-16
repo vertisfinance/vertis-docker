@@ -8,9 +8,9 @@ echo "vertisfinance/base"
 echo "--------------------"
 docker build -t vertisfinance/base "$dir/vertisfinance-base"
 
-echo "vertisfinance/postgres"
-echo "--------------------"
-docker build -t vertisfinance/postgres "$dir/vertisfinance-postgres"
+# echo "vertisfinance/postgres"
+# echo "--------------------"
+# docker build -t vertisfinance/postgres "$dir/vertisfinance-postgres"
 
 # echo "vertisfinance/nginx"
 # echo "--------------------"
